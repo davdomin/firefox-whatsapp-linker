@@ -2,7 +2,13 @@
   "manifest_version": 3,
   "name": "WhatsApp Quick Connect",
   "version": "1.0.0",
-  "description": "Automatically detects phone numbers on web pages and converts them into direct WhatsApp Web links.",
+  "description": "Automatically detects phone numbers on web pages and converts them into clickable WhatsApp links.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "whatsapp-quick-connect@yourdomain.com",
+      "strict_min_version": "109.0"
+    }
+  },
   "icons": {
     "48": "assets/icon-48.png"
   },
