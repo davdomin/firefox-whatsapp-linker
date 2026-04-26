@@ -3,27 +3,32 @@
   "name": "WhatsApp Quick Connect",
   "version": "1.0.0",
   "description": "Automatically detects phone numbers on web pages and converts them into clickable WhatsApp links.",
+  
   "browser_specific_settings": {
     "gecko": {
-      "id": "whatsapp-quick-connect@davdomin.dev",
-      "strict_min_version": "109.0",
-      "data_collection_permissions": {
-        "required": [
-             "locationInfo"
-          ],
-      }
+      "id": "whatsapp-quick-connect@daviddominguez.dev",
+      "strict_min_version": "109.0"
     }
   },
+
   "icons": {
-    "48": "assets/icon-48.png"
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
   },
+
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content/phone-detector.js"]
+      "js": ["content/phone-detector.js"],
+      "run_at": "document_idle"
     }
   ],
+
   "permissions": [
     "activeTab"
+  ],
+
+  "host_permissions": [
+    "<all_urls>"
   ]
 }
