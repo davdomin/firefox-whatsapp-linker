@@ -1,6 +1,5 @@
 /**
- * WhatsApp Quick Connect - Content Script
- * Scans the DOM for phone numbers and wraps them in WhatsApp API links.
+ * WhatsApp Quick Connect - Content Script (Secure Version)
  */
 
 const PHONE_REGEX = /\+?(\d{1,4})?[-.\s]?\(?\d{2,4}?\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}/g;
@@ -11,7 +10,6 @@ const processTextNodes = (rootNode) => {
         NodeFilter.SHOW_TEXT,
         {
             acceptNode: (node) => {
-                // Skip script, style, and existing anchor tags
                 const parent = node.parentNode.tagName;
                 const forbiddenTags = ['SCRIPT', 'STYLE', 'A', 'TEXTAREA', 'INPUT'];
                 return forbiddenTags.includes(parent) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
@@ -29,24 +27,42 @@ const processTextNodes = (rootNode) => {
     }
 
     nodesToReplace.forEach(node => {
-        const span = document.createElement('span');
-        span.className = 'wa-quick-connect-container';
-        
-        span.innerHTML = node.nodeValue.replace(PHONE_REGEX, (match) => {
-            const cleanNumber = match.replace(/\D/g, '');
-            return `<a href="https://wa.me/${cleanNumber}" 
-                       target="_blank" 
-                       title="Send WhatsApp message"
-                       style="color: #25D366 !important; text-decoration: underline !important; font-weight: bold !important; cursor: pointer !important;">
-                       ${match}
-                    </a>`;
-        });
-        
-        node.parentNode.replaceChild(span, node);
+        const text = node.nodeValue;
+        const fragment = document.createDocumentFragment();
+        let lastIndex = 0;
+        let match;
+
+        // Reset regex index for safety
+        PHONE_REGEX.lastIndex = 0;
+
+        while ((match = PHONE_REGEX.exec(text)) !== null) {
+            // Add text before the match
+            fragment.appendChild(document.createTextNode(text.substring(lastIndex, match.index)));
+
+            // Create the secure Anchor element
+            const anchor = document.createElement('a');
+            const cleanNumber = match[0].replace(/\D/g, '');
+            
+            anchor.href = `https://wa.me/${cleanNumber}`;
+            anchor.target = "_blank";
+            anchor.rel = "noopener noreferrer";
+            anchor.textContent = match[0]; // Safe way to add text
+            
+            // Inline styles
+            anchor.style.color = "#25D366";
+            anchor.style.textDecoration = "underline";
+            anchor.style.fontWeight = "bold";
+
+            fragment.appendChild(anchor);
+            lastIndex = PHONE_REGEX.lastIndex;
+        }
+
+        // Add remaining text
+        fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+        node.parentNode.replaceChild(fragment, node);
     });
 };
 
-// Execute once the DOM is fully loaded
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => processTextNodes(document.body));
 } else {
